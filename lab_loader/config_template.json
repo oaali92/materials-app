@@ -1,0 +1,15 @@
+{
+    "source": {
+        "folderPath": ""
+    }, 
+    "destination": {
+        "folderPath": ""
+    },
+    "serverCredentials": {
+        "host": "",
+        "port": "",
+        "database": "",
+        "user": "",
+        "password": ""
+    }
+}
