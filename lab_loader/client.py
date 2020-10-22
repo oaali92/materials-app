@@ -88,7 +88,6 @@ class Client:
                 loaded_data = self.get_data(table)         
                 if len(loaded_data) > 0:
                     materials_in_db = list(loaded_data['material_uid'])
-                    print(materials_in_db)
                     df = df.loc[~df.index.isin(materials_in_db)]
             if len(df) > 0:
                 df.to_sql(table, self.conn, if_exists='append', index=True)
