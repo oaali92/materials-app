@@ -98,7 +98,11 @@ def create_df(data):
         data : list
             placeholder for all icp and hall data
         """
-    return pd.DataFrame(data)
+    df = pd.DataFrame(data)
+    if 'material_uid' in df.columns:
+        df = df.set_index('material_uid')
+    
+    return df
    
 def move_files(from_path, to_path):
     if not os.path.isdir(to_path):

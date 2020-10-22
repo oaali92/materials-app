@@ -1,4 +1,3 @@
-# import psycopg2
 import pandas as pd
 import logging
 from sqlalchemy import create_engine
@@ -19,7 +18,7 @@ class Client:
         Retrieves data through the client into a pandas dataframe.
     
     insert_data():
-        Inserts data from a pandas dataframe through the client. Handles duplicates.
+        Inserts data from a pandas dataframe through the client. Handles duplicates
     """
 
     
@@ -53,13 +52,6 @@ class Client:
     
     def _create_postgres_connection(self):
         try:
-            # conn = psycopg2.connect(
-            #     host = self.host,
-            #     port = self.port,
-            #     database = self.database,
-            #     user = self.user,
-            #     password = self.password
-            # )
             connstr=f'postgresql+psycopg2://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}'
             conn = create_engine(connstr)
 
@@ -69,6 +61,15 @@ class Client:
         
         return conn
     
+    def _db_table_exists(self, table):
+        sql = f"select * from information_schema.tables where table_name = '{table}'"
+        if (self.conn):
+            results = pd.read_sql_query(sql, self.conn)
+        else:
+            logging.error("Please ensure a proper connection exists prior to querying your database")
+            return
+        return bool(len(results))
+
     def get_data(self, table, query = None):
         if (self.conn):
             if query is None:
@@ -81,8 +82,15 @@ class Client:
         else:
             logging.error("Please ensure a proper connection exists prior to querying your database.")
     
-    def insert_data(self, df, table):
+    def insert_data(self, df, table):       
         if (self.conn):
-            df.to_sql(table, self.conn, if_exists='append', index=False)
+            if (self._db_table_exists(table)):
+                loaded_data = self.get_data(table)         
+                if len(loaded_data) > 0:
+                    materials_in_db = list(loaded_data['material_uid'])
+                    print(materials_in_db)
+                    df = df.loc[~df.index.isin(materials_in_db)]
+            if len(df) > 0:
+                df.to_sql(table, self.conn, if_exists='append', index=True)
         else:
             logging.error("Please ensure a proper connection exists prior to inserting into your database")
