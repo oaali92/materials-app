@@ -1,6 +1,7 @@
-import psycopg2
+# import psycopg2
 import pandas as pd
 import logging
+from sqlalchemy import create_engine
 
 class Client:
     """
@@ -48,16 +49,20 @@ class Client:
         self.conn = self._create_postgres_connection()
 
 
+
     
     def _create_postgres_connection(self):
         try:
-            conn = psycopg2.connect(
-                host = self.host,
-                port = self.port,
-                database = self.database,
-                user = self.user,
-                password = self.password
-            )
+            # conn = psycopg2.connect(
+            #     host = self.host,
+            #     port = self.port,
+            #     database = self.database,
+            #     user = self.user,
+            #     password = self.password
+            # )
+            connstr=f'postgresql+psycopg2://{self.user}:{self.password}@{self.host}:{self.port}/{self.database}'
+            conn = create_engine(connstr)
+
         except Exception:
             logging.error("Connection failed. Please update your connection credentials.")
             return
@@ -76,3 +81,8 @@ class Client:
         else:
             logging.error("Please ensure a proper connection exists prior to querying your database.")
     
+    def insert_data(self, df, table):
+        if (self.conn):
+            df.to_sql(table, self.conn, if_exists='append', index=False)
+        else:
+            logging.error("Please ensure a proper connection exists prior to inserting into your database")

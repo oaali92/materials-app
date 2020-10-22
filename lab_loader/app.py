@@ -34,12 +34,22 @@ def main(args):
         password=config_params['serverCredentials']["password"]
     )
     folder_path = config_params['source']["folderPath"]
-    file_list = get_file_list(folder_path)
-    all_lines = []
-    for f in file_list:
-        lines = parse_file(folder_path + '\\' + f)
-        all_lines.append(lines)
-        print(lines)
+    parsed_data = parse_files(folder_path) 
+    hall_df = create_df(parsed_data['hall_data'])
+    icp_df = create_df(parsed_data['icp_data'])
+    try:
+        if len(hall_df) > 0:
+            err = client.insert_data(hall_df, 'hall_measurement')
+            if err is not None:
+                logging.error(err)
+        if len(icp_df) > 0:
+            err = client.insert_data(icp_df, 'icp_measurement')
+            if err is not None:
+                logging.error(err)
+        move_files(config_params['source']["folderPath"], config_params['destination']["folderPath"])
+    except Exception:
+        logging.error('Error inserting data into SQL database.')
+    
 
 
 
