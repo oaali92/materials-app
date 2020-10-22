@@ -8,8 +8,8 @@ import argparse
 import logging
 import os.path as osp
 import json
-from client import Client
-from utils import *
+from lab_loader.client import Client
+from lab_loader.utils import parse_files, create_df, move_files
 
 
 def main(args):
@@ -47,6 +47,7 @@ def main(args):
                 logging.error(err)
         if len(icp_df) > 0:
             err = client.insert_data(icp_df, "icp_measurement")
+
             if err is not None:
                 logging.error(err)
         move_files(

@@ -27,7 +27,6 @@ def _get_file_list(folder_path):
 def _get_row(file_path):
     """
     Generates a "row" of data from the text file path
-    Also 
 
     Parameters
     ---------
