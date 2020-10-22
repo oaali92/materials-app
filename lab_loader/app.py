@@ -9,56 +9,61 @@ import logging
 import os.path as osp
 import json
 from client import Client
-from utils import * 
+from utils import *
+
 
 def main(args):
     if args.config is None:
         logging.error("Please load a json config file.")
-        return 
+        return
 
     if osp.splitext(args.config)[1] != ".json":
         logging.error("Please load a file with a json extension.")
         return
-    try: 
+    try:
         with open(args.config) as fp:
             config_params = json.load(fp)
     except Exception:
-        logging.error("Config file path could not be loaded. Please load a proper file path.")
+        logging.error(
+            "Config file path could not be loaded. Please load a proper file path."
+        )
         "return"
 
     client = Client(
-        host=config_params['serverCredentials']["host"],
-        port=config_params['serverCredentials']["port"],
-        database=config_params['serverCredentials']["database"],
-        user=config_params['serverCredentials']["user"],
-        password=config_params['serverCredentials']["password"]
+        host=config_params["serverCredentials"]["host"],
+        port=config_params["serverCredentials"]["port"],
+        database=config_params["serverCredentials"]["database"],
+        user=config_params["serverCredentials"]["user"],
+        password=config_params["serverCredentials"]["password"],
     )
-    folder_path = config_params['source']["folderPath"]
-    parsed_data = parse_files(folder_path) 
-    hall_df = create_df(parsed_data['hall_data'])
-    icp_df = create_df(parsed_data['icp_data'])
+    folder_path = config_params["source"]["folderPath"]
+    parsed_data = parse_files(folder_path)
+    hall_df = create_df(parsed_data["hall_data"])
+    icp_df = create_df(parsed_data["icp_data"])
     try:
         if len(hall_df) > 0:
-            err = client.insert_data(hall_df, 'hall_measurement')
+            err = client.insert_data(hall_df, "hall_measurement")
             if err is not None:
                 logging.error(err)
         if len(icp_df) > 0:
-            err = client.insert_data(icp_df, 'icp_measurement')
+            err = client.insert_data(icp_df, "icp_measurement")
             if err is not None:
                 logging.error(err)
-        move_files(config_params['source']["folderPath"], config_params['destination']["folderPath"])
+        move_files(
+            config_params["source"]["folderPath"],
+            config_params["destination"]["folderPath"],
+        )
     except Exception:
-        logging.error('Error inserting data into SQL database.')
-    
-
-
+        logging.error("Error inserting data into SQL database.")
 
 
 if __name__ == "__main__":
     """ This is executed when run from the command line """
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("-c", "--config", help="Required configuration file for data load")
+    parser.add_argument(
+        "-c", "--config", help="Required configuration file for data load"
+    )
 
     args = parser.parse_args()
     main(args)
