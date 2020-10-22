@@ -45,13 +45,18 @@ def _get_row(file_path):
             row[key] = data[-1]
     new_keys = []
     new_units = []
-    for key in list(row.keys()):
+    for key, val in list(row.items()):
         if '(' in key:
+            row[key] = float(val)
             unit = key[key.find("(")+1:key.find(")")]
             new_key = key[:key.find("(")]
             row[new_key] = row.pop(key)
             new_keys.append(new_key)
             new_units.append(unit)
+        if 'concentration' in key:
+            row[key] = float(val)
+            new_key = key[:key.find('concentration')] + '_concentration' 
+            row[new_key] = row.pop(key)
         if key == 'x-labsdata':
             row.pop(key)
     for k, v in zip(new_keys, new_units):
