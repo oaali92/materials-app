@@ -1,6 +1,12 @@
 # Materials Company Loader
 
-This is an application that has been developed to load datafiles into a postgresql data model and add a visualization layer to that data model. This is an all encompasing solution that sits on top of Postgres with a python CLI loader and a streamlit dataviewer. 
+This is an application that has been developed to load datafiles into a postgresql data model and add a visualization layer to that data model. This is an all encompasing solution that sits on top of Postgres with a python CLI loader and a streamlit dataviewer.
+
+## Pre-Install Work
+----
+1) Please ensure you have a working instance of postgres to be able to connect to.
+2) Please run the provided sql script to insert data into a database of your choosing. The script should create the following tables with data: `ball_milling`, `hot_press`, `material_procurement`.
+3) Grab all relevant text files and put them in a directory of your choosing. The files need to carry the same nomenclature provided (should start with Hall or ICP). All other files in the directory will be ignored.
 
 ## Installation
 ---------------
