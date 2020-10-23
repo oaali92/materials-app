@@ -5,14 +5,11 @@ CLI app that views materials procurement, processing, and lab data
 __author__ = "Omar"
 import streamlit as st
 import json
-import pandas as pd
-import numpy as np
 import argparse
 import os.path as osp
 import logging
 from lab_loader.client import Client
-from data_viewer.charts import create_crossplot, numerical_columns, create_histogram
-
+from data_viewer.charts import create_crossplot, numerical_columns, create_histogram, create_histogram_chart, data_load, get_material_composition, create_pi_chart, create_impurity_bars, create_impurity_data
 
 def main(args):
     if args.config is None:
@@ -39,31 +36,11 @@ def main(args):
         password=config_params["serverCredentials"]["password"],
     )
     
-    sql = """
-        select 
-            bm.uid as bm_uid, 
-            bm.output_material_uid as bm_material, 
-            hot_press.uid as hp_uid, 
-            hot_press.output_material_uid as hp_material, 
-            * 
-        from ball_milling bm 
-        left join hot_press on hot_press.uid = bm.hot_press_uid
-        """
-    process_df = client.get_data(table=None, query=sql)
-    icp_data = client.get_data('icp_measurement')
-    hall_data = client.get_data('hall_measurement')
-    material_df = client.get_data('material_procurement')
-    material_df['name'] = material_df['material_name'] + material_df['mass_fraction'].astype(str)
-    material_df = material_df.groupby('ball_milling_uid')['name'].apply(lambda x: ''.join(x))
-    process_df['total_time'] = process_df['milling_time'] + process_df['hot_press_time']
-    process_df = process_df.merge(material_df, left_on = 'bm_uid', right_index=True)
-    output_material = pd.merge(process_df, icp_data, how = 'left', left_on='hp_material', right_on='material_uid').merge(hall_data, how='left', left_on='hp_material', right_on='material_uid')
-    output_material['total_impurity'] = output_material['sn_concentration'] + output_material['o_concentration'] + output_material['pb_concentration']
-
-    ## Streamlit
-    st.title('Material Viewer')
-    # all_data
+    (process_df, material_df, material_makeup, output_material, icp_data, hall_data) = data_load(client)
     
+    ## Streamlit
+    st.title('Materials Viewer')
+
     st.subheader('Total Production Time')
     x_axis_option = st.sidebar.selectbox(
         'Select X-Axis', numerical_columns
@@ -79,13 +56,32 @@ def main(args):
         'Select Histogram Field', numerical_columns
     )
 
-    hist_data = create_histogram(output_material, histogram_selector)
-    st.bar_chart(hist_data)
+    material_selector = st.sidebar.selectbox(
+        'Select Material by Composition', output_material['name']
+    )
+
+    hist_data, edges = create_histogram(output_material, histogram_selector)
+    histogram = create_histogram_chart(hist_data, edges)
+    st.write(histogram)
+    st.title('Material Make-Up')
+    material = get_material_composition(material_selector, material_makeup)
+    pi = create_pi_chart(material)
+    st.subheader('Material Composition')
+    st.write(pi)
+    
+    new_df  = create_impurity_data(material_selector, output_material)
+    st.subheader('Material Impurities')
+    fig = create_impurity_bars(new_df)
+    st.write(fig)
     if st.checkbox('Show raw data'):
         st.subheader('Processing Data')
         st.write(process_df)
         st.subheader('Lab Data')
         st.write(output_material)
+        st.subheader('Material Makeup')
+        st.write(material_makeup)
+        st.subheader('Procurement Data')
+        st.write(material_df)
 
 if __name__ == "__main__":
 
