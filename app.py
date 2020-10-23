@@ -42,11 +42,11 @@ def main(args):
     icp_df = create_df(parsed_data["icp_data"])
     try:
         if len(hall_df) > 0:
-            err = client.insert_data(hall_df, "hall_measurement")
+            err = client.insert_data(hall_df, "hall_measurement", 'material_uid')
             if err is not None:
                 logging.error(err)
         if len(icp_df) > 0:
-            err = client.insert_data(icp_df, "icp_measurement")
+            err = client.insert_data(icp_df, "icp_measurement", 'material_uid')
 
             if err is not None:
                 logging.error(err)
