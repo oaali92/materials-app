@@ -90,6 +90,11 @@ class Client:
                     materials_in_db = list(loaded_data['material_uid'])
                     df = df.loc[~df.index.isin(materials_in_db)]
             if len(df) > 0:
-                df.to_sql(table, self.conn, if_exists='append', index=True)
+                err = df.to_sql(table, self.conn, if_exists='append', index=True)
+                if err is None:
+                    logging.info('Data was successfully loaded.')
+            else:
+                logging.info('No new Hall or ICP measurements found.')
         else:
             logging.error("Please ensure a proper connection exists prior to inserting into your database")
+        
