@@ -59,7 +59,7 @@ An example command running from same directory as the app would look like this:
 
 `python app.py -c config.json`
 
-## Step 2: Viewer
+## Part 2: Viewer
 ---------------
 The viewer is configured using `streamlit`, which was used just to setup an easy scripting methodology for dashboarding. The viewer utilizes both `streamlit` and `bokeh` plots. To run the streamlit CLI tool, the command is simple:
 ```
