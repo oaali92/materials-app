@@ -19,6 +19,9 @@ numerical_columns = [
 
 
 def data_load(client):
+    """
+        Takes in a sql client and loads all data required for the dashboard.
+    """
     sql = """
             select 
             bm.uid as bm_uid, 
@@ -44,6 +47,9 @@ def data_load(client):
     return (process_df, material_df, material_makeup, output_material, icp_data, hall_data)
 
 def create_crossplot(df, x_axis='total_time', y_axis='total_impurity'):
+    """
+        Uses dataframe and two axes and creates a cross plot. 
+    """
     cds = ColumnDataSource(df)
     p = figure(
         x_axis_label = x_axis,
@@ -67,6 +73,9 @@ def create_crossplot(df, x_axis='total_time', y_axis='total_impurity'):
     return p
 
 def create_histogram(df, column):
+    """
+        Takes a selected field and shows a distribution
+    """
     
     unique_values = df[column].dropna().unique()
     if len(unique_values) < 3:
@@ -120,4 +129,19 @@ def create_impurity_bars(df):
     cds = ColumnDataSource(df)
     fig = figure(x_range = df['index'].unique())
     fig.vbar(source=cds, x='index', top='impurity', width = 0.8, line_color='color', fill_color = 'color')
+    return fig
+
+def create_material_bars(df, field):
+    df = df.sort_values(by=field, ascending=False)
+    cds = ColumnDataSource(df)
+    fig = figure(x_range = df['name'])
+    fig.vbar(source=cds, x='name', top=field, width=0.3)
+    hover = HoverTool(
+        tooltips = [
+            ('Name', '@name'),
+            ('Material ID', '@hp_material'),
+            (field, f'@{field}'),
+        ]
+    )
+    fig.add_tools(hover)
     return fig

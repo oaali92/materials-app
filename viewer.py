@@ -9,7 +9,7 @@ import argparse
 import os.path as osp
 import logging
 from lab_loader.client import Client
-from data_viewer.charts import create_crossplot, numerical_columns, create_histogram, create_histogram_chart, data_load, get_material_composition, create_pi_chart, create_impurity_bars, create_impurity_data
+from data_viewer.charts import create_crossplot, numerical_columns, create_histogram, create_histogram_chart, data_load, get_material_composition, create_pi_chart, create_impurity_bars, create_impurity_data, create_material_bars
 
 def main(args):
     if args.config is None:
@@ -41,26 +41,28 @@ def main(args):
     ## Streamlit
     st.title('Materials Viewer')
 
-    st.subheader('Total Production Time')
     x_axis_option = st.sidebar.selectbox(
         'Select X-Axis', numerical_columns
     )
     y_axis_option = st.sidebar.selectbox(
         'Select Y-Axis', numerical_columns
     )
-    
+    st.subheader(f'{y_axis_option} by {x_axis_option}')    
     cross_plot = create_crossplot(output_material, x_axis=x_axis_option, y_axis = y_axis_option)
     st.bokeh_chart(cross_plot)
     
-    histogram_selector = st.sidebar.selectbox(
-        'Select Histogram Field', numerical_columns
+    field_selector = st.sidebar.selectbox(
+        'Select Field to Visualize by Material', numerical_columns
     )
 
     material_selector = st.sidebar.selectbox(
         'Select Material by Composition', output_material['name']
     )
-
-    hist_data, edges = create_histogram(output_material, histogram_selector)
+    st.subheader(f'{field_selector} by Material')
+    cat_bars = create_material_bars(output_material, field_selector)
+    st.write(cat_bars)
+    hist_data, edges = create_histogram(output_material, field_selector)
+    st.subheader(f'{field_selector} distribution')
     histogram = create_histogram_chart(hist_data, edges)
     st.write(histogram)
     st.title('Material Make-Up')
