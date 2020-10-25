@@ -1,4 +1,4 @@
-# Materials Company Loader
+# Materials Data Loader
 
 This is an application that has been developed to load datafiles into a postgresql data model and add a visualization layer to that data model. This is an all encompasing solution that sits on top of Postgres with a python CLI loader and a streamlit dataviewer.
 
