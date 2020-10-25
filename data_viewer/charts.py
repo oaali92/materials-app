@@ -76,7 +76,6 @@ def create_histogram(df, column):
     """
         Takes a selected field and shows a distribution
     """
-    
     unique_values = df[column].dropna().unique()
     if len(unique_values) < 3:
         bins = 1
@@ -87,21 +86,32 @@ def create_histogram(df, column):
     return hist_data
 
 def create_histogram_chart(hist, edge):
+    """
+        Generates histogram from numeric data
+        Requires output from create_histogram
+    """
     fig = figure()
     fig.quad(top=hist, bottom=0, left=edge[:-1], right=edge[1:], fill_color='navy', line_color='white')
     return fig
 
 def get_material_composition(name, df):
+    """
+        Generates a dataframe of material composition by mass fraction
+    """
     filt = df.loc[df['name'] == name]
     filt = filt[['Cu', 'Se', 'Zn']]
     filt = filt.T
     filt.columns = ['value']
     filt['angle'] = filt['value']/filt['value'].sum() * 2*pi
+    # creating color column from Spectral6 Palette
     filt['color'] = Spectral6[:len(filt)]
     filt = filt.reset_index()
     return filt
 
 def create_pi_chart(df):
+    """
+        Creates a pie chart by material composition
+    """
     cds = ColumnDataSource(df)
     p = figure(plot_height=350, toolbar_location=None,
            tools="hover", tooltips="@index: @value{0.00}", x_range=(-0.5, 1.0))
@@ -116,6 +126,9 @@ def create_pi_chart(df):
     return p
 
 def create_impurity_data(name, df):
+    """
+        Generates data with impurity levels for a given material
+    """
     df = df.loc[df['name'] == name]
     df = df[['pb_concentration', 'sn_concentration', 'o_concentration']]
     df = df.T
@@ -124,7 +137,11 @@ def create_impurity_data(name, df):
     return df
 
 def create_impurity_bars(df):
+    """
+        Creates impurity bars for a given material
+    """
     df.columns = ['index', 'impurity']
+    # using other spectral6 palette colors
     df['color'] = Spectral6[len(df):]
     cds = ColumnDataSource(df)
     fig = figure(x_range = df['index'].unique())
@@ -132,6 +149,9 @@ def create_impurity_bars(df):
     return fig
 
 def create_material_bars(df, field):
+    """
+        Creates bars for each material and a given field
+    """
     df = df.sort_values(by=field, ascending=False)
     cds = ColumnDataSource(df)
     fig = figure(x_range = df['name'])
